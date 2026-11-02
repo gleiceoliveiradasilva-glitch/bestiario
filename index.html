@@ -1,0 +1,449 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bestiário de Andorium</title>
+
+<style>
+:root {
+  --gold: #c9a45c;
+  --dark: #17130f;
+  --panel: #241e18;
+  --cream: #f5ecd9;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #100e0c;
+  color: var(--cream);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+header {
+  text-align: center;
+  padding: 28px 16px;
+  border-bottom: 2px solid var(--gold);
+  background: linear-gradient(135deg, #21170f, #100e0c);
+}
+
+header h1 {
+  color: var(--gold);
+  font-size: clamp(24px, 5vw, 38px);
+  margin: 0 0 8px;
+  letter-spacing: 2px;
+}
+
+header p { margin: 0; }
+
+main {
+  width: min(100% - 28px, 900px);
+  margin: 24px auto 50px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid #6f5937;
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 22px;
+}
+
+h2 {
+  color: var(--gold);
+  font-size: 21px;
+  border-bottom: 1px solid #6f5937;
+  padding-bottom: 10px;
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  margin: 16px 0 7px;
+  font-weight: bold;
+}
+
+input, select, textarea {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #756347;
+  border-radius: 7px;
+  background: #100e0c;
+  color: white;
+  font: 16px Arial, sans-serif;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+input[type="file"] { padding: 9px; }
+
+.help {
+  color: #c8bba5;
+  font: 13px Arial, sans-serif;
+  line-height: 1.5;
+  margin-top: 7px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 18px;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+button {
+  border: 1px solid var(--gold);
+  border-radius: 7px;
+  padding: 13px 18px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.primary {
+  background: var(--gold);
+  color: #17110a;
+}
+
+.secondary {
+  background: transparent;
+  color: var(--cream);
+}
+
+button:hover { filter: brightness(1.12); }
+
+#preview {
+  background: white;
+  color: #21190f;
+  padding: 24px;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+
+#preview h2, #preview h3 {
+  color: #67451b;
+  border-color: #b69a65;
+}
+
+#preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+  margin: 15px auto;
+}
+
+.preview-section {
+  border-top: 1px solid #d7c8a9;
+  padding: 10px 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.preview-section h3 {
+  margin: 0 0 7px;
+  font-size: 15px;
+}
+
+#status {
+  margin-top: 12px;
+  color: #e4c98f;
+  font: 14px Arial, sans-serif;
+}
+
+@media (max-width: 600px) {
+  main { width: calc(100% - 20px); }
+  .card { padding: 15px; }
+  .grid { grid-template-columns: 1fr; }
+  .buttons { flex-direction: column; }
+  button { width: 100%; }
+  #preview { padding: 14px; }
+}
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  body { background: white; color: black; }
+  header, #formulario, .no-print { display: none !important; }
+  main { width: 100%; margin: 0; }
+  #area-preview { display: block !important; }
+  #preview {
+    display: block !important;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    color: black;
+  }
+  #preview h2, #preview h3 { color: #67451b; }
+  #preview img { max-height: 170mm; }
+  .preview-section { break-inside: avoid; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>BESTIÁRIO DE ANDORIUM</h1>
+  <p>Catálogo de criaturas e seres extraordinários</p>
+</header>
+
+<main>
+
+<section class="card" id="formulario">
+  <h2>Ficha de catalogação</h2>
+  <p class="help">Preencha as informações conhecidas. Os campos podem ficar vazios quando os dados ainda não foram definidos.</p>
+
+  <div class="grid">
+    <div>
+      <label for="registro">Número do registro</label>
+      <input id="registro" type="number" min="1" value="1">
+      <p class="help">Informe o próximo número disponível no catálogo.</p>
+    </div>
+    <div>
+      <label for="nome">Nome da criatura</label>
+      <input id="nome" placeholder="Ex.: Faunos">
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <label for="categoria">Categoria</label>
+      <select id="categoria">
+        <option value="">Selecione</option>
+        <option>Animal fantástico</option>
+        <option>Ser feérico</option>
+        <option>Criatura mágica</option>
+        <option>Predador monstruoso</option>
+        <option>Entidade sobrenatural</option>
+        <option>Outra categoria</option>
+        <option>Ainda não definida</option>
+      </select>
+    </div>
+    <div>
+      <label for="estado">Estado de desenvolvimento</label>
+      <select id="estado">
+        <option>Apenas idealizada</option>
+        <option selected>Conceito e características definidos</option>
+        <option>Já possui ilustração</option>
+        <option>Ficha parcialmente concluída</option>
+        <option>Ficha concluída</option>
+      </select>
+    </div>
+  </div>
+
+  <label for="habitat">Região ou habitat</label>
+  <input id="habitat" placeholder="Ex.: Floresta da Divisa">
+
+  <label for="imagem">Imagem principal da criatura</label>
+  <input id="imagem" type="file" accept="image/*">
+  <p class="help">Selecione a ilustração salva no seu celular ou computador. Ela será incluída na ficha para impressão.</p>
+  <div id="imageStatus" class="help"></div>
+
+  <label for="aparencia">Aparência e características físicas</label>
+  <textarea id="aparencia" placeholder="Aparência, tamanho, anatomia e outras características..."></textarea>
+
+  <label for="ciclo">Ciclo de vida</label>
+  <textarea id="ciclo" placeholder="Nascimento, crescimento, envelhecimento..."></textarea>
+
+  <label for="reproducao">Reprodução</label>
+  <textarea id="reproducao" placeholder="Informações conhecidas sobre a reprodução..."></textarea>
+
+  <label for="sociedade">Comportamento e sociedade</label>
+  <textarea id="sociedade" placeholder="Organização social, hábitos e comunicação..."></textarea>
+
+  <label for="habilidades">Habilidades e vulnerabilidades</label>
+  <textarea id="habilidades" placeholder="Poderes, capacidades e fraquezas conhecidas..."></textarea>
+
+  <label for="ecologia">Ecologia e relações com outras espécies</label>
+  <textarea id="ecologia" placeholder="Alimentação, predadores e relações ecológicas..."></textarea>
+
+  <label for="notas">Notas adicionais</label>
+  <textarea id="notas" placeholder="Outras informações fornecidas pela autora..."></textarea>
+
+  <label for="pendencias">Informações pendentes</label>
+  <textarea id="pendencias" placeholder="Dúvidas e características que ainda precisam ser definidas..."></textarea>
+
+  <div class="buttons">
+    <button class="primary" type="button" onclick="gerarFicha()">Gerar ficha</button>
+    <button class="secondary" type="button" onclick="imprimirFicha()">Imprimir / Salvar PDF</button>
+    <button class="secondary" type="button" onclick="limparFicha()">Limpar formulário</button>
+  </div>
+  <div id="status" role="status" aria-live="polite"></div>
+</section>
+
+<section id="area-preview" class="card">
+  <h2>Prévia da ficha</h2>
+  <p class="help no-print">A prévia abaixo mostra como o conteúdo será organizado. O layout final inspirado no PDF de referência será refinado nas próximas etapas.</p>
+  <article id="preview">
+    <h2>BESTIÁRIO DE ANDORIUM</h2>
+    <p>Preencha o formulário e clique em “Gerar ficha”.</p>
+  </article>
+</section>
+
+</main>
+
+<script>
+let imagemCarregada = "";
+let gerada = false;
+
+const campos = [
+  ["nome", "Nome da criatura"],
+  ["categoria", "Categoria"],
+  ["habitat", "Região ou habitat"],
+  ["estado", "Estado de desenvolvimento"],
+  ["aparencia", "Aparência e características físicas"],
+  ["ciclo", "Ciclo de vida"],
+  ["reproducao", "Reprodução"],
+  ["sociedade", "Comportamento e sociedade"],
+  ["habilidades", "Habilidades e vulnerabilidades"],
+  ["ecologia", "Ecologia e relações com outras espécies"],
+  ["notas", "Notas adicionais"],
+  ["pendencias", "Informações pendentes"]
+];
+
+function escapar(texto) {
+  return String(texto).replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[c]);
+}
+
+document.getElementById("imagem").addEventListener("change", function() {
+  const arquivo = this.files[0];
+  imagemCarregada = "";
+  gerada = false;
+
+  if (!arquivo) {
+    document.getElementById("imageStatus").textContent = "";
+    return;
+  }
+
+  if (!arquivo.type.startsWith("image/")) {
+    document.getElementById("imageStatus").textContent = "Selecione um arquivo de imagem.";
+    this.value = "";
+    return;
+  }
+
+  if (arquivo.size > 12 * 1024 * 1024) {
+    document.getElementById("imageStatus").textContent =
+      "A imagem ultrapassa 12 MB. Escolha uma imagem menor.";
+    this.value = "";
+    return;
+  }
+
+  const leitor = new FileReader();
+  leitor.onload = () => {
+    imagemCarregada = leitor.result;
+    document.getElementById("imageStatus").textContent =
+      "Imagem carregada. Clique em “Gerar ficha” para visualizar.";
+  };
+  leitor.onerror = () => {
+    document.getElementById("imageStatus").textContent =
+      "Não foi possível ler essa imagem.";
+  };
+  leitor.readAsDataURL(arquivo);
+});
+
+function gerarFicha() {
+  const nome = document.getElementById("nome").value.trim();
+  const registro = document.getElementById("registro").value;
+  const partes = [];
+
+  if (!nome) {
+    document.getElementById("status").textContent =
+      "Preencha o nome da criatura antes de gerar a ficha.";
+    document.getElementById("nome").focus();
+    return;
+  }
+
+  if (!registro || Number(registro) < 1) {
+    document.getElementById("status").textContent =
+      "Informe um número de registro válido.";
+    document.getElementById("registro").focus();
+    return;
+  }
+
+  campos.forEach(([id, titulo]) => {
+    const valor = document.getElementById(id).value.trim();
+    if (valor) {
+      partes.push(
+        '<section class="preview-section"><h3>' +
+        escapar(titulo) + '</h3><div>' +
+        escapar(valor) + '</div></section>'
+      );
+    }
+  });
+
+  let html =
+    '<div style="text-align:center;border-bottom:2px solid #b69a65;padding-bottom:12px">' +
+    '<div style="font-size:13px;letter-spacing:2px">BESTIÁRIO DE ANDORIUM</div>' +
+    '<h2 style="margin:8px 0">REGISTRO ' +
+    escapar(String(registro).padStart(3, "0")) + '</h2>' +
+    '<h1 style="font-size:30px;margin:8px 0">' + escapar(nome) + '</h1>' +
+    '</div>';
+
+  if (imagemCarregada) {
+    html += '<img src="' + imagemCarregada + '" alt="Ilustração de ' +
+      escapar(nome) + '">';
+  }
+
+  html += partes.join("");
+
+  document.getElementById("preview").innerHTML = html;
+  document.getElementById("status").textContent =
+    "Ficha gerada. Confira a prévia antes de imprimir.";
+  gerada = true;
+  document.getElementById("area-preview").scrollIntoView({behavior:"smooth"});
+}
+
+function imprimirFicha() {
+  if (!gerada) gerarFicha();
+  if (!gerada) return;
+  window.print();
+}
+
+function limparFicha() {
+  if (!confirm("Deseja limpar todos os campos? Esta ação não pode ser desfeita.")) return;
+
+  campos.forEach(([id]) => {
+    const campo = document.getElementById(id);
+    if (campo.tagName === "SELECT") campo.selectedIndex = id === "estado" ? 1 : 0;
+    else campo.value = "";
+  });
+
+  document.getElementById("registro").value = "1";
+  document.getElementById("imagem").value = "";
+  document.getElementById("imageStatus").textContent = "";
+  document.getElementById("status").textContent = "";
+  imagemCarregada = "";
+  gerada = false;
+  document.getElementById("preview").innerHTML =
+    "<h2>BESTIÁRIO DE ANDORIUM</h2><p>Preencha o formulário e clique em “Gerar ficha”.</p>";
+}
+</script>
+
+</body>
+</html>
+```
