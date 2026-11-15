@@ -267,7 +267,21 @@ button:hover { filter: brightness(1.12); }
   }
   #preview h2, #preview h3 { color: #67451b; }
   #preview img { max-height: 170mm; }
-  .preview-section { break-inside: avoid; }
+  .preview-section {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  .preview-section h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  
+  .preview-section p,
+  .preview-section li {
+    orphans: 3;
+    widows: 3;
+  }
 }
 </style>
 </head>
