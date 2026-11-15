@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bestiário de Andorium</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 :root {
@@ -210,74 +211,37 @@ button:hover { filter: brightness(1.12); }
   #preview { padding: 14px; }
 }
 
-@page {
-  size: A4;
-  margin: 12mm 12mm 22mm;
+/* A impressão será gerada diretamente em PDF pelo botão.
+   Estas regras mantêm o conteúdo de referência sem depender da prévia de impressão do navegador. */
+#printFooter { display: none !important; }
+
+.pdf-export-area {
+  background: #fff !important;
+  color: #21190f !important;
 }
 
-@media print {
-  body { background: white; color: black; }
-  header,
-  #formulario,
-  .no-print,
-  #area-preview > h2,
-  #area-preview > h2:first-of-type {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-  }
-  body { padding-bottom: 0; }
-  main { width: 100%; margin: 0; }
-  #area-preview { display: block !important; margin: 0; padding: 0; border: 0; }
-  #printFooter,
-  #printFooter.print-footer {
-    display: block !important;
-    visibility: visible !important;
-    position: fixed !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    padding-top: 2mm !important;
-    margin: 0 !important;
-    border-top: 0.35mm solid #b69a65 !important;
-    color: #67451b !important;
-    background: white !important;
-    text-align: left !important;
-    font: 7pt Arial, sans-serif !important;
-    line-height: 1.2 !important;
-  }
-  .identificacao { break-inside: avoid; }
-  .identificacao table { break-inside: avoid; }
-  #preview {
-    display: block !important;
-    padding: 0;
-    border: none;
-    border-radius: 0;
-    color: black;
-  }
-  #preview h2, #preview h3 { color: #67451b; }
-  #preview img { max-height: 170mm; }
-  .preview-section {
-    break-inside: auto;
-    page-break-inside: auto;
-  }
-
-  .preview-section h3 {
-    break-after: avoid;
-    page-break-after: avoid;
-  }
-  
-  .preview-section p,
-  .preview-section li {
-    orphans: 3;
-    widows: 3;
-  }
+.pdf-export-area img {
+  max-width: 100% !important;
+  max-height: 170mm !important;
+  object-fit: contain !important;
 }
+
+.pdf-export-area .identificacao,
+.pdf-export-area .identificacao table {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.pdf-export-area .preview-section {
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+.pdf-export-area .preview-section h3 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
 </style>
 </head>
 
@@ -634,32 +598,89 @@ function gerarFicha() {
   html += partes.join("");
 
   document.getElementById("preview").innerHTML = html;
-  document.getElementById("printFooter").textContent =
-    "BESTIÁRIO DE ANDORIUM • REGISTRO " +
-    String(registro).padStart(3, "0") + ": " + nome.toLocaleUpperCase("pt-BR");
   document.getElementById("status").textContent =
     "Ficha gerada. Confira a prévia antes de imprimir.";
   gerada = true;
   document.getElementById("area-preview").scrollIntoView({behavior:"smooth"});
 }
 
-function atualizarRodape() {
-  const registro = document.getElementById("registro").value || "0";
-  const nome = document.getElementById("nome").value.trim() || "CRIATURA";
-  
-  document.getElementById("printFooter").textContent =
-    "BESTIÁRIO DE ANDORIUM • REGISTRO " +
-    String(registro).padStart(3, "0") + ": " +
-    nome.toLocaleUpperCase("pt-BR");
+function nomeArquivoSeguro(texto) {
+  return String(texto)
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9_-]/g, "") || "criatura";
 }
-  
-window.addEventListener("beforeprint", atualizarRodape);
 
-function imprimirFicha() {
+async function imprimirFicha() {
   if (!gerada) gerarFicha();
   if (!gerada) return;
-  atualizarRodape();
-  window.print();
+
+  const status = document.getElementById("status");
+  const preview = document.getElementById("preview");
+
+  if (typeof html2pdf === "undefined") {
+    status.textContent = "Não foi possível carregar o gerador de PDF. Verifique sua conexão com a internet e tente novamente.";
+    return;
+  }
+
+  const registro = String(document.getElementById("registro").value || "0").padStart(3, "0");
+  const nome = document.getElementById("nome").value.trim();
+  const textoRodape = "BESTIÁRIO DE ANDORIUM • REGISTRO " + registro + ": " + nome.toLocaleUpperCase("pt-BR");
+  const nomeArquivo = "registro_" + registro + "_" + nomeArquivoSeguro(nome) + ".pdf";
+
+  status.textContent = "Gerando PDF. Aguarde um instante...";
+
+  // A classe temporária garante fundo branco e estilos de impressão sem alterar a prévia na tela.
+  preview.classList.add("pdf-export-area");
+
+  const opcoes = {
+    margin: [12, 12, 22, 12],
+    filename: nomeArquivo,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      scrollX: 0,
+      scrollY: 0
+    },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    pagebreak: { mode: ["css", "legacy"] }
+  };
+
+  try {
+    const trabalhador = html2pdf().set(opcoes).from(preview).toPdf();
+    const pdf = await trabalhador.get("pdf");
+    const totalPaginas = pdf.internal.getNumberOfPages();
+    const larguraPagina = pdf.internal.pageSize.getWidth();
+    const alturaPagina = pdf.internal.pageSize.getHeight();
+
+    for (let pagina = 1; pagina <= totalPaginas; pagina++) {
+      pdf.setPage(pagina);
+      const yLinha = alturaPagina - 15;
+      const yTexto = alturaPagina - 10;
+
+      pdf.setDrawColor(182, 154, 101);
+      pdf.setLineWidth(0.35);
+      pdf.line(12, yLinha, larguraPagina - 12, yLinha);
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(7);
+      pdf.setTextColor(103, 69, 27);
+      pdf.text(textoRodape, 12, yTexto);
+      pdf.text(String(pagina), larguraPagina - 12, yTexto, { align: "right" });
+    }
+
+    await trabalhador.save();
+    status.textContent = "PDF gerado e baixado com sucesso!";
+  } catch (erro) {
+    console.error(erro);
+    status.textContent = "Não foi possível gerar o PDF. Tente novamente; seus dados continuam preenchidos.";
+  } finally {
+    preview.classList.remove("pdf-export-area");
+  }
 }
 
 function limparFicha() {
