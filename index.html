@@ -211,7 +211,7 @@ button:hover { filter: brightness(1.12); }
 
 @page {
   size: A4;
-  margin: 12mm 12mm 19mm;
+  margin: 12mm 12mm 20mm;
 }
 
 @media print {
@@ -234,16 +234,17 @@ button:hover { filter: brightness(1.12); }
   .print-footer {
     display: block !important;
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: -13mm;
-    padding-top: 4px;
+    left: 12mm;
+    right: 12mm;
+    bottom: 5mm;
+    padding-top: 3px;
     border-top: 1px solid #b69a65;
     color: #67451b;
     background: white;
     text-align: center;
-    font: bold 9pt Georgia, "Times New Roman", serif;
-    letter-spacing: .3px;
+    font: bold 8pt Georgia, "Times New Roman", serif;
+    letter-spacing: .2px;
+    z-index: 9999;
   }
   .identificacao { break-inside: avoid; }
   .identificacao table { break-inside: avoid; }
@@ -362,10 +363,10 @@ button:hover { filter: brightness(1.12); }
     <h2>BESTIÁRIO DE ANDORIUM</h2>
     <p>Preencha o formulário e clique em “Gerar ficha”.</p>
   </article>
-  <div id="printFooter" class="print-footer" aria-hidden="true"></div>
 </section>
 
 </main>
+<div id="printFooter" class="print-footer" aria-hidden="true"></div>
 
 <script>
 let imagemCarregada = "";
@@ -439,6 +440,7 @@ function exportarFicha() {
     versao: 1,
     salvoEm: new Date().toISOString(),
     registro: document.getElementById("registro").value,
+    nome: document.getElementById("nome").value.trim(),
     campos: {},
     imagem: imagemCarregada || ""
   };
@@ -447,7 +449,7 @@ function exportarFicha() {
     dados.campos[id] = document.getElementById(id).value;
   });
 
-  if (!dados.campos.nome.trim()) {
+  if (!dados.nome) {
     document.getElementById("status").textContent =
       "Preencha pelo menos o nome da criatura antes de baixar a ficha.";
     document.getElementById("nome").focus();
@@ -458,7 +460,7 @@ function exportarFicha() {
   const arquivo = new Blob([conteudo], { type: "application/json" });
   const url = URL.createObjectURL(arquivo);
   const link = document.createElement("a");
-  const nomeSeguro = dados.campos.nome
+  const nomeSeguro = dados.nome
     .trim()
     .normalize("NFD")
     .replace(/[\\u0300-\\u036f]/g, "")
@@ -472,7 +474,8 @@ function exportarFicha() {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+  // Aguarda o navegador iniciar o download antes de liberar a URL temporária.
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
 
   document.getElementById("status").textContent =
     "Ficha salva! Guarde o arquivo JSON para importar e editar depois.";
@@ -506,6 +509,8 @@ function importarFicha(evento) {
       }
 
       document.getElementById("registro").value = dados.registro || "1";
+      document.getElementById("nome").value =
+        dados.nome || (dados.campos && dados.campos.nome) || "";
 
       campos.forEach(([id]) => {
         const campo = document.getElementById(id);
@@ -565,7 +570,10 @@ function gerarFicha() {
     return;
   }
 
+  const camposNaTabela = new Set(["categoria", "habitat", "estado"]);
+
   campos.forEach(([id, titulo]) => {
+    if (camposNaTabela.has(id)) return;
     const valor = document.getElementById(id).value.trim();
     if (valor) {
       partes.push(
