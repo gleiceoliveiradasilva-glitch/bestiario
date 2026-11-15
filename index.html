@@ -1,3 +1,4 @@
+```
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -284,8 +285,11 @@ button:hover { filter: brightness(1.12); }
   <div class="buttons">
     <button class="primary" type="button" onclick="gerarFicha()">Gerar ficha</button>
     <button class="secondary" type="button" onclick="imprimirFicha()">Imprimir / Salvar PDF</button>
+    <button class="secondary" type="button" onclick="exportarFicha()">Baixar ficha para edição</button>
+    <button class="secondary" type="button" onclick="selecionarImportacao()">Importar ficha salva</button>
     <button class="secondary" type="button" onclick="limparFicha()">Limpar formulário</button>
   </div>
+  <input id="arquivoImportacao" type="file" accept=".json,application/json" hidden>
   <div id="status" role="status" aria-live="polite"></div>
 </section>
 
@@ -364,6 +368,121 @@ document.getElementById("imagem").addEventListener("change", function() {
   };
   leitor.readAsDataURL(arquivo);
 });
+
+document.getElementById("arquivoImportacao").addEventListener("change", importarFicha);
+
+function exportarFicha() {
+  const dados = {
+    formato: "bestiario-andorium",
+    versao: 1,
+    salvoEm: new Date().toISOString(),
+    registro: document.getElementById("registro").value,
+    campos: {},
+    imagem: imagemCarregada || ""
+  };
+
+  campos.forEach(([id]) => {
+    dados.campos[id] = document.getElementById(id).value;
+  });
+
+  if (!dados.campos.nome.trim()) {
+    document.getElementById("status").textContent =
+      "Preencha pelo menos o nome da criatura antes de baixar a ficha.";
+    document.getElementById("nome").focus();
+    return;
+  }
+
+  const conteudo = JSON.stringify(dados, null, 2);
+  const arquivo = new Blob([conteudo], { type: "application/json" });
+  const url = URL.createObjectURL(arquivo);
+  const link = document.createElement("a");
+  const nomeSeguro = dados.campos.nome
+    .trim()
+    .normalize("NFD")
+    .replace(/[\\u0300-\\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "") || "criatura";
+
+  link.href = url;
+  link.download = "registro_" +
+    String(dados.registro || "sem_numero").padStart(3, "0") +
+    "_" + nomeSeguro + ".json";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+
+  document.getElementById("status").textContent =
+    "Ficha salva! Guarde o arquivo JSON para importar e editar depois.";
+}
+
+function selecionarImportacao() {
+  document.getElementById("arquivoImportacao").click();
+}
+
+function importarFicha(evento) {
+  const arquivo = evento.target.files[0];
+  if (!arquivo) return;
+
+  const leitor = new FileReader();
+
+  leitor.onload = () => {
+    try {
+      const dados = JSON.parse(leitor.result);
+
+      if (
+        dados.formato !== "bestiario-andorium" ||
+        dados.versao !== 1 ||
+        !dados.campos ||
+        typeof dados.campos !== "object"
+      ) {
+        throw new Error("Este arquivo não parece ser uma ficha válida do Bestiário de Andorium.");
+      }
+
+      if (dados.imagem && typeof dados.imagem !== "string") {
+        throw new Error("A imagem salva no arquivo está em um formato inválido.");
+      }
+
+      document.getElementById("registro").value = dados.registro || "1";
+
+      campos.forEach(([id]) => {
+        const campo = document.getElementById(id);
+        if (Object.prototype.hasOwnProperty.call(dados.campos, id)) {
+          campo.value = dados.campos[id] ?? "";
+        } else if (campo.tagName === "SELECT") {
+          campo.selectedIndex = id === "estado" ? 1 : 0;
+        } else {
+          campo.value = "";
+        }
+      });
+
+      imagemCarregada = dados.imagem || "";
+      document.getElementById("imagem").value = "";
+      document.getElementById("imageStatus").textContent = imagemCarregada
+        ? "Imagem recuperada do arquivo salvo."
+        : "Esta ficha não possui imagem salva.";
+
+      gerada = false;
+      document.getElementById("preview").innerHTML =
+        "<h2>BESTIÁRIO DE ANDORIUM</h2><p>Ficha importada. Clique em “Gerar ficha” para atualizar a prévia.</p>";
+      document.getElementById("status").textContent =
+        "Ficha importada com sucesso! Confira os campos e gere a prévia quando quiser.";
+    } catch (erro) {
+      document.getElementById("status").textContent =
+        "Não foi possível importar: " + erro.message;
+    } finally {
+      evento.target.value = "";
+    }
+  };
+
+  leitor.onerror = () => {
+    document.getElementById("status").textContent =
+      "Não foi possível ler o arquivo selecionado.";
+    evento.target.value = "";
+  };
+
+  leitor.readAsText(arquivo, "UTF-8");
+}
 
 function gerarFicha() {
   const nome = document.getElementById("nome").value.trim();
@@ -445,3 +564,4 @@ function limparFicha() {
 
 </body>
 </html>
+```
