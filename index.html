@@ -84,6 +84,7 @@ textarea {
 }
 
 input[type="file"] { padding: 9px; }
+#arquivoImportacao[hidden] { display: none !important; }
 
 .help {
   color: #c8bba5;
@@ -211,7 +212,7 @@ button:hover { filter: brightness(1.12); }
 
 @page {
   size: A4;
-  margin: 12mm 12mm 20mm;
+  margin: 12mm 12mm 22mm;
 }
 
 @media print {
@@ -231,20 +232,24 @@ button:hover { filter: brightness(1.12); }
   body { padding-bottom: 0; }
   main { width: 100%; margin: 0; }
   #area-preview { display: block !important; margin: 0; padding: 0; border: 0; }
-  .print-footer {
+  #printFooter.print-footer {
     display: block !important;
-    position: fixed;
-    left: 12mm;
-    right: 12mm;
-    bottom: 5mm;
-    padding-top: 3px;
-    border-top: 1px solid #b69a65;
-    color: #67451b;
-    background: white;
-    text-align: center;
-    font: bold 8pt Georgia, "Times New Roman", serif;
-    letter-spacing: .2px;
-    z-index: 9999;
+    visibility: visible !important;
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 3mm 12mm 0 !important;
+    margin: 0 !important;
+    border-top: 0.35mm solid #b69a65 !important;
+    color: #67451b !important;
+    background: #fff !important;
+    text-align: center !important;
+    font: bold 8pt Georgia, "Times New Roman", serif !important;
+    letter-spacing: .2px !important;
+    z-index: 2147483647 !important;
   }
   .identificacao { break-inside: avoid; }
   .identificacao table { break-inside: avoid; }
