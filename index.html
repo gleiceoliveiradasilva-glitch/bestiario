@@ -468,9 +468,9 @@ function exportarFicha() {
   const nomeSeguro = dados.nome
     .trim()
     .normalize("NFD")
-    .replace(/[\\u0300-\\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9_-]+/g, "_")
-    .replace(/^_+|_+$/g, "") || "criatura";
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9_-]/g, "") || "criatura";
 
   link.href = url;
   link.download = "registro_" +
