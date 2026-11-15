@@ -634,9 +634,22 @@ function gerarFicha() {
   document.getElementById("area-preview").scrollIntoView({behavior:"smooth"});
 }
 
+function atualizarRodape() {
+  const registro = document.getElementById("registro").value || "0";
+  const nome = document.getElementById("nome").value.trim() || "CRIATURA";
+  
+  document.getElementById("printFooter").textContent =
+    "BESTIÁRIO DE ANDORIUM • REGISTRO " +
+    String(registro).padStart(3, "0") + ": " +
+    nome.toLocaleUpperCase("pt-BR");
+}
+  
+window.addEventListener("beforeprint", atualizarRodape);
+
 function imprimirFicha() {
   if (!gerada) gerarFicha();
   if (!gerada) return;
+  atualizarRodape();
   window.print();
 }
 
